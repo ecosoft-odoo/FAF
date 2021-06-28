@@ -42,6 +42,16 @@
   merges:
     - oca $ODOO_VERSION
 
+./server-tools:
+  defaults:
+    depth: $DEPTH_MERGE
+  remotes:
+    oca: https://github.com/OCA/server-tools.git
+  target: oca $ODOO_VERSION
+  merges:
+    - oca $ODOO_VERSION
+    - oca refs/pull/2039/head # auto_backup
+
 ./l10n-thailand:
   defaults:
     depth: $DEPTH_MERGE

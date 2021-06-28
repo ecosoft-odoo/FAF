@@ -7,6 +7,8 @@ reporting-engine:
 server-ux:
   - date_range
   - base_tier_validation # Task T1253
+server-tools:
+  - auto_backup
 l10n-thailand:
   - l10n_th_tax_invoice
   - l10n_th_partner
