@@ -26,3 +26,5 @@ project:
   - project_deadline
 account-invoicing:
   - account_move_tier_validation
+enterprice-14.0:
+  - "*"
