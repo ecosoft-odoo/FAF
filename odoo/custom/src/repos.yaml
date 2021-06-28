@@ -41,7 +41,6 @@
   target: oca $ODOO_VERSION
   merges:
     - oca $ODOO_VERSION
-    - oca refs/pull/269/head
 
 ./l10n-thailand:
   defaults:
@@ -51,7 +50,6 @@
   target: oca $ODOO_VERSION
   merges:
     - oca $ODOO_VERSION
-    - oca refs/pull/189/head # l10n_th_tax_report
     - oca refs/pull/206/head # l10n_th_withholding_tax_cert
     - oca refs/pull/192/head # l10n_th_withholding_tax_cert_form
     - oca refs/pull/214/head # l10n_th_withholding_tax_report
@@ -83,7 +81,6 @@
   target: oca $ODOO_VERSION
   merges:
     - oca $ODOO_VERSION
-    - oca refs/pull/777/head # project_deadline
 
 ./account-invoicing:
   defaults:
@@ -93,4 +90,3 @@
   target: oca $ODOO_VERSION
   merges:
     - oca $ODOO_VERSION
-    - oca refs/pull/853/head # account_move_tier_validation
