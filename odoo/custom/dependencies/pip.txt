@@ -2,3 +2,4 @@ git+https://github.com/OCA/openupgradelib.git@master
 unicodecsv
 unidecode
 greenlet==0.4.16
+pysftp==0.2.8
