@@ -10,7 +10,7 @@ server-ux:
 l10n-thailand:
   - l10n_th_tax_invoice
   - l10n_th_partner
-  - l10n_th_tax_report # https://github.com/OCA/l10n-thailand/pull/189
+  - l10n_th_tax_report
   - l10n_th_withholding_tax
   - l10n_th_withholding_tax_cert # https://github.com/OCA/l10n-thailand/pull/206
   - l10n_th_withholding_tax_cert_form # https://github.com/OCA/l10n-thailand/pull/192
@@ -21,8 +21,6 @@ purchase-workflow:
 project:
   - project_list
   - project_status
-  - project_deadline # https://github.com/OCA/sale-workflow/pull/1425
+  - project_deadline
 account-invoicing:
   - account_move_tier_validation
-#enterprice-14.0:
-#  - "*"

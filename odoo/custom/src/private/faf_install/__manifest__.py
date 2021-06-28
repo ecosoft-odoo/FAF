@@ -17,7 +17,7 @@
         # "account_accountant",
         # OCA Modules
         "l10n_th_tax_invoice",
-        "l10n_th_tax_report",  # Still in PR
+        "l10n_th_tax_report",
         "l10n_th_withholding_tax",
         "l10n_th_withholding_tax_cert",  # Still in PR
         "l10n_th_withholding_tax_cert_form",  # Still in PR
