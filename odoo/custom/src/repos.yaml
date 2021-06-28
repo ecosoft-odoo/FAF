@@ -100,3 +100,12 @@
   target: oca $ODOO_VERSION
   merges:
     - oca $ODOO_VERSION
+
+./web:
+  defaults:
+    depth: $DEPTH_DEFAULT
+  remotes:
+    oca: https://github.com/OCA/web.git
+  target: oca $ODOO_VERSION
+  merges:
+    - oca $ODOO_VERSION
