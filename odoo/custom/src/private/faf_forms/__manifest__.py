@@ -19,6 +19,7 @@
         "data/report_data.xml",
         "report/quotation_form.xml",
         "report/invoice_form.xml",
+        "report/receipt_tax_invoice_form.xml",
         "report/receipt_form.xml",
         "views/assets.xml",
     ],

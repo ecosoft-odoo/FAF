@@ -1,6 +1,6 @@
 <odoo>
     <!--Copyright 2021 Ecosoft Co., Ltd (http://ecosoft.co.th)-->
-    <template id="report_receipt_document">
+    <template id="report_receipt_tax_invoice_document">
         <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
         <div class="article faf_receipt">
             <div class="row">
@@ -16,7 +16,7 @@
             </div>
             <div class="row">
                 <div class="col-12 text-right title">
-                    <strong style="font-size: 22pt;">RECEIPT</strong>
+                    <strong style="font-size: 22pt;">RECEIPT/TAX INVOICE</strong>
                 </div>
             </div>
             <!-- Customer Details -->
@@ -29,7 +29,9 @@
                         No.:
                     </div>
                     <div class="col-3 detail white-border no-right-border">
-                        <span t-field="doc.name" />
+                        <span
+                            t-esc="', '.join(filter(lambda l: l, set(doc.tax_invoice_ids.mapped('tax_invoice_number'))))"
+                        />
                     </div>
                 </div>
                 <div class="row">
@@ -40,7 +42,9 @@
                         Date:
                     </div>
                     <div class="col-3 detail white-border no-right-border">
-                        <span t-field="doc.date" />
+                        <span
+                            t-esc="', '.join([date.strftime('%d/%m/%Y') for date in filter(lambda l: l, set(doc.tax_invoice_ids.mapped('tax_invoice_date')))])"
+                        />
                     </div>
                 </div>
                 <div class="row">
@@ -325,11 +329,11 @@
         </div>
     </template>
 
-    <template id="report_receipt">
+    <template id="report_receipt_tax_invoice">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
                 <t
-                    t-call="faf_forms.report_receipt_document"
+                    t-call="faf_forms.report_receipt_tax_invoice_document"
                     t-lang="doc.partner_id.lang"
                 />
             </t>
