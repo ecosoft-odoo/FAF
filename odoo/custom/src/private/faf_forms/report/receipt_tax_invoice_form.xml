@@ -29,9 +29,7 @@
                         No.:
                     </div>
                     <div class="col-3 detail white-border no-right-border">
-                        <span
-                            t-esc="', '.join(filter(lambda l: l, set(doc.tax_invoice_ids.mapped('tax_invoice_number'))))"
-                        />
+                        <span t-field="doc.name"/>
                     </div>
                 </div>
                 <div class="row">
