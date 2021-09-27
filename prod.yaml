@@ -32,6 +32,10 @@ services:
       service: db
     env_file:
       - .docker/db-creation.env
+    environment:
+      # Can connect database for any IP (No need ssl)
+      WAN_CONNECTION: host
+      WAN_AUTH_METHOD: md5
     restart: unless-stopped
     ports:
       - "5432:5432"
