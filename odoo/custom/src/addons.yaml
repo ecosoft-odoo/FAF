@@ -18,6 +18,7 @@ l10n-thailand:
   - l10n_th_withholding_tax_cert_form # https://github.com/OCA/l10n-thailand/pull/192
   - l10n_th_withholding_tax_report # https://github.com/OCA/l10n-thailand/pull/214
   - l10n_th_amount_to_text
+  - l10n_th_fonts
 purchase-workflow:
   - purchase_tier_validation # Task T1253
 project:
