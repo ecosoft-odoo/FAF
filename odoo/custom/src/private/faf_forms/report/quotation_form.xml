@@ -465,22 +465,22 @@
                     </div>
                 </div>
             </div>
-            <!-- Service Include -->
+            <!-- Service Inclusions -->
             <div style="page-break-inside: avoid;margin-top: 30px;">
                 <div class="row">
                     <div class="col-12 title">
-                        <strong>SERVICE INCLUDE:</strong>
+                        <strong>SERVICE INCLUSIONS:</strong>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-12" t-field="doc.service_include_description" />
                 </div>
             </div>
-            <!-- Service Exclude -->
+            <!-- Service Exclusions -->
             <div style="page-break-inside: avoid;margin-top: 30px;">
                 <div class="row">
                     <div class="col-12 title">
-                        <strong>SERVICE EXCLUDE:</strong>
+                        <strong>SERVICE EXCLUSIONS:</strong>
                     </div>
                 </div>
                 <div class="row">
