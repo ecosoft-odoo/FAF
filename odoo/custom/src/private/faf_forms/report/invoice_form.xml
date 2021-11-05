@@ -349,7 +349,7 @@
                                     <td class="text-right">
                                         <t
                                             t-set="amount_wt"
-                                            t-value="sum(doc.invoice_line_ids.filtered('wt_tax_id').mapped(lambda l: l.wt_tax_id.amount / 100 * (l.quantity * l.price_unit)))"
+                                            t-value="sum(doc.line_ids.filtered('wt_tax_id').mapped(lambda l: l.wt_tax_id.amount / 100 * l.amount_currency))"
                                         />
                                         <t t-if="amount_wt">
                                             (<strong
