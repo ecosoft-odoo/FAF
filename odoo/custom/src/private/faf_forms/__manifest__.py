@@ -21,6 +21,7 @@
         "report/invoice_form.xml",
         "report/receipt_tax_invoice_form.xml",
         "report/receipt_form.xml",
+        "report/report_payment_receipt_templates.xml",
         "views/assets.xml",
     ],
     "license": "AGPL-3",
