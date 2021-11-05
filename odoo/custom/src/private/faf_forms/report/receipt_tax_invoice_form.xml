@@ -37,7 +37,7 @@
                         No.:
                     </div>
                     <div class="col-3 detail white-border no-right-border">
-                        <span t-field="doc.name"/>
+                        <span t-field="doc.name" />
                     </div>
                 </div>
                 <div class="row">
@@ -48,7 +48,7 @@
                         Date:
                     </div>
                     <div class="col-3 detail white-border no-right-border">
-                        <span t-field="doc.date"/>
+                        <span t-field="doc.date" />
                     </div>
                 </div>
                 <div class="row">
@@ -336,7 +336,7 @@
     <template id="report_receipt_tax_invoice">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
-                <t t-set="ncopies" t-value="3"/>
+                <t t-set="ncopies" t-value="3" />
                 <t t-foreach="range(ncopies)" t-as="i">
                     <t
                         t-call="faf_forms.report_receipt_tax_invoice_document"

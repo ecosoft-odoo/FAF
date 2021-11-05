@@ -1,0 +1,26 @@
+<odoo>
+    <template id="template" inherit_id="account.report_payment_receipt_document">
+        <xpath expr="//table/thead/tr/th[3]" position="after">
+            <th><span>Payment Reference</span></th>
+        </xpath>
+        <xpath expr="//table/tbody/tr//td[3]" position="after">
+            <td><span t-field="inv.payment_reference" /></td>
+        </xpath>
+        <xpath expr="//table/thead/tr/th[6]" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//table/tbody/tr//td[6]" position="attributes">
+            <attribute name="invisible">1</attribute>
+        </xpath>
+        <xpath expr="//table/thead/tr/th[6]" position="after">
+            <th class="text-right"><span>WHT Amount</span></th>
+        </xpath>
+        <xpath expr="//table/tbody/tr//td[6]" position="after">
+            <t
+                t-set="amount_wt"
+                t-value="sum(inv.line_ids.filtered('wt_tax_id').mapped(lambda l: l.wt_tax_id.amount / 100 * l.amount_currency))"
+            />
+            <td class="text-right"><span t-esc="'{:,.2f}'.format(amount_wt)" /></td>
+        </xpath>
+    </template>
+</odoo>
