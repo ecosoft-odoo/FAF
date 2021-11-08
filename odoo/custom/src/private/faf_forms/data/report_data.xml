@@ -39,6 +39,19 @@
         <field name="paperformat_id" ref="faf_forms.faf_paperformat_a4" />
     </record>
 
+    <!-- Receipt/Tax Invoice Form (No Detail) -->
+    <record id="action_report_receipt_tax_invoice_no_detail" model="ir.actions.report">
+        <field name="name">USP Receipt/Tax Invoice (No Detail)</field>
+        <field name="model">account.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">faf_forms.report_receipt_tax_invoice_no_detail</field>
+        <field name="report_file">faf_forms.report_receipt_tax_invoice_no_detail</field>
+        <field name="print_report_name">object.display_name</field>
+        <field name="binding_model_id" ref="account.model_account_payment" />
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="faf_forms.faf_paperformat_a4" />
+    </record>
+
     <!-- Receipt Form -->
     <record id="action_report_receipt" model="ir.actions.report">
         <field name="name">USP Receipt</field>
