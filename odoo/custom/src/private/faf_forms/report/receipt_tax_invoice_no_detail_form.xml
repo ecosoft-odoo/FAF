@@ -1,10 +1,10 @@
 <odoo>
     <!--Copyright 2021 Ecosoft Co., Ltd (http://ecosoft.co.th)-->
-    <template id="report_receipt_document">
+    <template id="report_receipt_tax_invoice_no_detail_document">
         <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
         <div class="article faf_receipt">
             <div class="row">
-                <div class="col-12">
+                <div class="col-6">
                     <t t-set="company" t-value="doc.company_id" />
                     <img
                         t-if="company.logo"
@@ -13,10 +13,18 @@
                         alt="Logo"
                     />
                 </div>
+                <div class="col-6 text-right" style="font-size: 22pt;">
+                    <t t-if="i == 0">
+                        ORIGINAL
+                    </t>
+                    <t t-else="">
+                        COPY
+                    </t>
+                </div>
             </div>
             <div class="row">
                 <div class="col-12 text-right title">
-                    <strong style="font-size: 22pt;">RECEIPT</strong>
+                    <strong style="font-size: 22pt;">RECEIPT/TAX INVOICE</strong>
                 </div>
             </div>
             <!-- Customer Details -->
@@ -110,12 +118,12 @@
                                 <t t-set="subtotal" t-value="0" />
                                 <t t-set="amount_tax" t-value="0" />
                                 <t t-set="amount_wt" t-value="0" />
-                                <t
+                                <t t-set="number" t-value="0" />
+                                <tr
                                     t-foreach="doc.move_id._get_reconciled_invoices_partials()"
                                     t-as="rec"
                                 >
                                     <t t-set="inv" t-value="rec[2].move_id" />
-                                    <t t-set="number" t-value="0" />
                                     <t
                                         t-set="amount_tax"
                                         t-value="amount_tax + inv.amount_tax"
@@ -124,69 +132,53 @@
                                         t-set="amount_wt"
                                         t-value="amount_wt + sum(inv.line_ids.filtered('wt_tax_id').mapped(lambda l: l.wt_tax_id.amount / 100 * l.amount_currency))"
                                     />
-                                    <tr class="bg-200 font-weight-bold o_line_section">
-                                        <td />
-                                        <td colspan="4">Invoice Number : <span
-                                                t-field="inv.name"
-                                            /></td>
-                                    </tr>
-                                    <tr
-                                        t-foreach="inv.invoice_line_ids.sorted('sequence')"
-                                        t-as="line"
-                                    >
-                                        <t t-if="not line.display_type">
+                                    <td class="text-center">
+                                        <t t-set="number" t-value="number + 1" />
+                                        <span t-esc="number" />
+                                    </td>
+                                    <td>
+                                        Invoice Number : <span t-field="inv.name" />
+                                    </td>
+                                    <td class="text-right">
+                                        <t
+                                            t-set="amount"
+                                            t-value="sum(inv.invoice_line_ids.filtered(lambda line: not line.tax_ids or not line.tax_ids.filtered(lambda l: l.amount)).mapped(lambda k: k.quantity * k.price_unit))"
+                                        />
+                                        <t t-if="amount">
+                                            <span t-esc="'{0:,.2f}'.format(amount)" />
                                             <t
-                                                t-set="amount"
-                                                t-value="line.quantity * line.price_unit"
+                                                t-set="subtotal_non_vat"
+                                                t-value="subtotal_non_vat + amount"
                                             />
+                                        </t>
+                                    </td>
+                                    <td class="text-right">
+                                        <t
+                                            t-set="amount"
+                                            t-value="sum(inv.invoice_line_ids.filtered(lambda line: line.tax_ids and line.tax_ids.filtered(lambda l: l.amount)).mapped(lambda k: k.quantity * k.price_unit))"
+                                        />
+                                        <t t-if="amount">
+                                            <span t-esc="'{0:,.2f}'.format(amount)" />
+                                            <t
+                                                t-set="subtotal_vat"
+                                                t-value="subtotal_vat + amount"
+                                            />
+                                        </t>
+                                    </td>
+                                    <td class="text-right">
+                                        <t
+                                            t-set="amount"
+                                            t-value="sum(inv.invoice_line_ids.mapped(lambda k: k.quantity * k.price_unit))"
+                                        />
+                                        <t t-if="amount">
+                                            <span t-esc="'{0:,.2f}'.format(amount)" />
                                             <t
                                                 t-set="subtotal"
                                                 t-value="subtotal + amount"
                                             />
-                                            <td class="text-center">
-                                                <t
-                                                    t-set="number"
-                                                    t-value="number + 1"
-                                                />
-                                                <span t-esc="number" />
-                                            </td>
-                                            <td>
-                                                <span t-field="line.name" />
-                                            </td>
-                                            <td class="text-right">
-                                                <t
-                                                    t-if="not line.tax_ids or not line.tax_ids.filtered(lambda l: l.amount)"
-                                                >
-                                                    <span
-                                                        t-esc="'{0:,.2f}'.format(amount)"
-                                                    />
-                                                    <t
-                                                        t-set="subtotal_non_vat"
-                                                        t-value="subtotal_non_vat + amount"
-                                                    />
-                                                </t>
-                                            </td>
-                                            <td class="text-right">
-                                                <t
-                                                    t-if="line.tax_ids and line.tax_ids.filtered(lambda l: l.amount)"
-                                                >
-                                                    <span
-                                                        t-esc="'{0:,.2f}'.format(amount)"
-                                                    />
-                                                    <t
-                                                        t-set="subtotal_vat"
-                                                        t-value="subtotal_vat + amount"
-                                                    />
-                                                </t>
-                                            </td>
-                                            <td class="text-right">
-                                                <span
-                                                    t-esc="'{0:,.2f}'.format(amount)"
-                                                />
-                                            </td>
                                         </t>
-                                    </tr>
-                                </t>
+                                    </td>
+                                </tr>
                                 <tr>
                                     <td class="text-right" colspan="2">
                                         <strong>Sub Total</strong>
@@ -329,13 +321,16 @@
         </div>
     </template>
 
-    <template id="report_receipt">
+    <template id="report_receipt_tax_invoice_no_detail">
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="doc">
-                <t
-                    t-call="faf_forms.report_receipt_document"
-                    t-lang="doc.partner_id.lang"
-                />
+                <t t-set="ncopies" t-value="3" />
+                <t t-foreach="range(ncopies)" t-as="i">
+                    <t
+                        t-call="faf_forms.report_receipt_tax_invoice_no_detail_document"
+                        t-lang="doc.partner_id.lang"
+                    />
+                </t>
             </t>
         </t>
     </template>

@@ -20,6 +20,7 @@
         "report/quotation_form.xml",
         "report/invoice_form.xml",
         "report/receipt_tax_invoice_form.xml",
+        "report/receipt_tax_invoice_no_detail_form.xml",
         "report/receipt_form.xml",
         "report/report_payment_receipt_templates.xml",
         "views/assets.xml",
