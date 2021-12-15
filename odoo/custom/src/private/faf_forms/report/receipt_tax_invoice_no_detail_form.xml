@@ -119,33 +119,58 @@
                                 <t t-set="amount_tax" t-value="0" />
                                 <t t-set="amount_wt" t-value="0" />
                                 <t t-set="number" t-value="0" />
-                                <tr
-                                    t-foreach="doc.move_id._get_reconciled_invoices_partials()"
-                                    t-as="rec"
-                                >
-                                    <t t-set="inv" t-value="rec[2].move_id" />
+                                <!-- Get all account.move -->
+                                <t
+                                    t-set="full_reconcile"
+                                    t-value="doc.move_id.line_ids.mapped('full_reconcile_id')"
+                                />
+                                <t t-if="full_reconcile and len(full_reconcile) == 1">
+                                    <!-- If matching exist -->
+                                    <t
+                                        t-set="moves"
+                                        t-value="full_reconcile.reconciled_line_ids.filtered(lambda l: l.move_id != doc.move_id).mapped('move_id')"
+                                    />
+                                </t>
+                                <t t-else="">
+                                    <!-- If matching not exist -->
+                                    <t
+                                        t-set="reconciled_invoice_partial"
+                                        t-value="doc.move_id._get_reconciled_invoices_partials()"
+                                    />
+                                    <t
+                                        t-set="moves"
+                                        t-value="reconciled_invoice_partial[2].move_id or []"
+                                    />
+                                </t>
+                                <tr t-foreach="moves" t-as="m">
+                                    <t
+                                        t-set="sign"
+                                        t-value="m.move_type == 'out_refund' and -1 or 1"
+                                    />
                                     <t
                                         t-set="amount_tax"
-                                        t-value="amount_tax + inv.amount_tax"
+                                        t-value="amount_tax + sign * m.amount_tax"
                                     />
                                     <t
                                         t-set="amount_wt"
-                                        t-value="amount_wt + sum(inv.line_ids.filtered('wt_tax_id').mapped(lambda l: l.wt_tax_id.amount / 100 * l.amount_currency))"
+                                        t-value="amount_wt + sign * sum(m.line_ids.filtered('wt_tax_id').mapped(lambda l: l.wt_tax_id.amount / 100 * l.amount_currency))"
                                     />
                                     <td class="text-center">
                                         <t t-set="number" t-value="number + 1" />
                                         <span t-esc="number" />
                                     </td>
                                     <td>
-                                        Invoice Number : <span t-field="inv.name" />
+                                        Invoice Number : <span t-field="m.name" />
                                     </td>
                                     <td class="text-right">
                                         <t
                                             t-set="amount"
-                                            t-value="sum(inv.invoice_line_ids.filtered(lambda line: not line.tax_ids or not line.tax_ids.filtered(lambda l: l.amount)).mapped(lambda k: k.quantity * k.price_unit))"
+                                            t-value="sign * sum(m.invoice_line_ids.filtered(lambda line: not line.tax_ids or not line.tax_ids.filtered(lambda l: l.amount)).mapped(lambda k: k.quantity * k.price_unit))"
                                         />
                                         <t t-if="amount">
-                                            <span t-esc="'{0:,.2f}'.format(amount)" />
+                                            <span
+                                                t-esc="(amount &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(amount))"
+                                            />
                                             <t
                                                 t-set="subtotal_non_vat"
                                                 t-value="subtotal_non_vat + amount"
@@ -155,10 +180,12 @@
                                     <td class="text-right">
                                         <t
                                             t-set="amount"
-                                            t-value="sum(inv.invoice_line_ids.filtered(lambda line: line.tax_ids and line.tax_ids.filtered(lambda l: l.amount)).mapped(lambda k: k.quantity * k.price_unit))"
+                                            t-value="sign * sum(m.invoice_line_ids.filtered(lambda line: line.tax_ids and line.tax_ids.filtered(lambda l: l.amount)).mapped(lambda k: k.quantity * k.price_unit))"
                                         />
                                         <t t-if="amount">
-                                            <span t-esc="'{0:,.2f}'.format(amount)" />
+                                            <span
+                                                t-esc="(amount &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(amount))"
+                                            />
                                             <t
                                                 t-set="subtotal_vat"
                                                 t-value="subtotal_vat + amount"
@@ -168,10 +195,12 @@
                                     <td class="text-right">
                                         <t
                                             t-set="amount"
-                                            t-value="sum(inv.invoice_line_ids.mapped(lambda k: k.quantity * k.price_unit))"
+                                            t-value="sign * sum(m.invoice_line_ids.mapped(lambda k: k.quantity * k.price_unit))"
                                         />
                                         <t t-if="amount">
-                                            <span t-esc="'{0:,.2f}'.format(amount)" />
+                                            <span
+                                                t-esc="(amount &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(amount))"
+                                            />
                                             <t
                                                 t-set="subtotal"
                                                 t-value="subtotal + amount"
@@ -186,21 +215,21 @@
                                     <td class="text-right">
                                         <t t-if="subtotal_non_vat">
                                             <strong
-                                                t-esc="'{:,.2f}'.format(subtotal_non_vat)"
+                                                t-esc="(subtotal_non_vat &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(subtotal_non_vat))"
                                             />
                                         </t>
                                     </td>
                                     <td class="text-right">
                                         <t t-if="subtotal_vat">
                                             <strong
-                                                t-esc="'{:,.2f}'.format(subtotal_vat)"
+                                                t-esc="(subtotal_vat &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(subtotal_vat))"
                                             />
                                         </t>
                                     </td>
                                     <td class="text-right">
                                         <t t-if="subtotal">
                                             <strong
-                                                t-esc="'{:,.2f}'.format(subtotal)"
+                                                t-esc="(subtotal &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(subtotal))"
                                             />
                                         </t>
                                     </td>
@@ -213,14 +242,14 @@
                                     <td class="text-right">
                                         <t t-if="amount_tax">
                                             <strong
-                                                t-esc="'{:,.2f}'.format(amount_tax)"
+                                                t-esc="(amount_tax &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(amount_tax))"
                                             />
                                         </t>
                                     </td>
                                     <td class="text-right">
                                         <t t-if="amount_tax">
                                             <strong
-                                                t-esc="'{:,.2f}'.format(amount_tax)"
+                                                t-esc="(amount_tax &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(amount_tax))"
                                             />
                                         </t>
                                     </td>
@@ -232,21 +261,21 @@
                                     <td class="text-right">
                                         <t t-if="subtotal_non_vat">
                                             <strong
-                                                t-esc="'{:,.2f}'.format(subtotal_non_vat)"
+                                                t-esc="(subtotal_non_vat &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(subtotal_non_vat))"
                                             />
                                         </t>
                                     </td>
                                     <td class="text-right">
                                         <t t-if="subtotal_vat">
                                             <strong
-                                                t-esc="'{:,.2f}'.format(subtotal_vat + amount_tax)"
+                                                t-esc="(subtotal_vat + amount_tax &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(subtotal_vat + amount_tax))"
                                             />
                                         </t>
                                     </td>
                                     <td class="text-right">
                                         <t t-if="subtotal">
                                             <strong
-                                                t-esc="'{:,.2f}'.format(subtotal + amount_tax)"
+                                                t-esc="(subtotal + amount_tax &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(subtotal + amount_tax))"
                                             />
                                         </t>
                                     </td>
@@ -260,7 +289,7 @@
                                     <td class="text-right">
                                         <t t-if="amount_wt">
                                             (<strong
-                                                t-esc="'{:,.2f}'.format(amount_wt)"
+                                                t-esc="(amount_wt &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(amount_wt))"
                                             />)
                                         </t>
                                     </td>
@@ -273,7 +302,7 @@
                                     <td class="text-right" />
                                     <td class="text-right">
                                         <strong
-                                            t-esc="'{:,.2f}'.format(subtotal + amount_tax - amount_wt)"
+                                            t-esc="(subtotal + amount_tax - amount_wt &lt; 0 and '({:,.2f})' or '{:,.2f}').format(abs(subtotal + amount_tax - amount_wt))"
                                         />
                                     </td>
                                 </tr>
