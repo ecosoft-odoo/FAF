@@ -139,7 +139,7 @@
                                     />
                                     <t
                                         t-set="moves"
-                                        t-value="reconciled_invoice_partial[2].move_id or []"
+                                        t-value="reconciled_invoice_partial and reconciled_invoice_partial[2].move_id or []"
                                     />
                                 </t>
                                 <tr t-foreach="moves.sorted('invoice_date')" t-as="m">
