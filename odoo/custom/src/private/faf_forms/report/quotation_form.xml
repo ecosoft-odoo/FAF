@@ -5,13 +5,32 @@
         <div class="article faf_quotation">
             <div class="row">
                 <div class="col-12">
-                    <t t-set="company" t-value="doc.company_id" />
-                    <img
-                        t-if="company.logo"
-                        t-att-src="image_data_uri(company.logo)"
-                        class="logo"
-                        alt="Logo"
-                    />
+                    <div class="row">
+                        <t t-set="company" t-value="doc.company_id" />
+                        <div class="col-2">
+                            <img
+                                t-if="company.logo"
+                                t-att-src="image_data_uri(company.logo)"
+                                class="logo"
+                                alt="Logo"
+                            />
+                        </div>
+                        <div class="col-7">
+                            <span style="font-size: 12pt;" t-field="company.name" /><br
+                            />
+                            <span
+                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.country_id.name, company.zip])))"
+                            /><br />
+                            <span t-esc="'Tax ID : %s' % company.vat" />
+                        </div>
+                        <div class="col-3" style="padding-right: 0px;">
+                            <span
+                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch)"
+                            /><br />
+                            <span t-esc="'Tel : %s' % company.phone" /><br />
+                            <span t-esc="'Email : %s' % company.email" />
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -22,32 +41,24 @@
             <!-- Customer Details -->
             <div style="page-break-inside: avoid;">
                 <div class="row">
-                    <div class="col-3 text-right detail white-border no-left-border">
-                        No.:
+                    <div class="col-3 detail white-border no-left-border">
+                        Quotation No. :
                     </div>
                     <div class="col-9 detail white-border no-right-border">
                         <span t-field="doc.name" />
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right detail white-border no-left-border">
-                        Subject:
-                    </div>
-                    <div class="col-9 detail white-border no-right-border">
-                        <span t-field="doc.subject" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3 text-right detail white-border no-left-border">
-                        Sale Consultant
+                    <div class="col-3 detail white-border no-left-border">
+                        Sale Consultant :
                     </div>
                     <div class="col-9 detail white-border no-right-border">
                         <span t-field="doc.salesperson_id.name" />
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right detail white-border no-left-border">
-                        Date:
+                    <div class="col-3 detail white-border no-left-border">
+                        Date :
                     </div>
                     <div class="col-9">
                         <div class="row">
@@ -64,8 +75,8 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right detail white-border no-left-border">
-                        Customer:
+                    <div class="col-3 detail white-border no-left-border">
+                        Customer :
                     </div>
                     <div class="col-9">
                         <div class="row">
@@ -79,18 +90,26 @@
                                 <span t-field="doc.partner_id.country_id.name" />
                             </div>
                             <div class="col-6 detail white-border no-right-border">
-                                Tel: <span t-field="doc.partner_id.phone" /><br />
-                                Email: <span t-field="doc.partner_id.email" />
+                                Tel : <span t-field="doc.partner_id.phone" /><br />
+                                Email : <span t-field="doc.partner_id.email" />
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right detail white-border no-left-border">
-                        Tax ID:
+                    <div class="col-3 detail white-border no-left-border">
+                        Tax ID :
                     </div>
                     <div class="col-9 detail white-border no-right-border">
                         <span t-field="doc.partner_id.vat" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 detail white-border no-left-border">
+                        Subject :
+                    </div>
+                    <div class="col-9 detail white-border no-right-border">
+                        <span t-field="doc.subject" />
                     </div>
                 </div>
             </div>
@@ -102,58 +121,64 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right gray-border">
-                        Relocation From<br />
-                        Relocation To
+                    <div class="col-3 gray-border">
+                        Relocation From :
                     </div>
                     <div class="col-9 gray-border">
-                        <span t-field="doc.relocation_from" /><br />
+                        <span t-field="doc.relocation_from" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-3 gray-border">
+                        Relocation To :
+                    </div>
+                    <div class="col-9 gray-border">
                         <span t-field="doc.relocation_to" />
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right gray-border">
-                        Mode of Shipment
+                    <div class="col-3 gray-border">
+                        Mode of Shipment :
                     </div>
                     <div class="col-9 gray-border">
                         <span t-field="doc.mode_shipment" />
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right gray-border">
-                        Not exceeding the estimated volume of
+                    <div class="col-3 gray-border">
+                        Estimated Volume :
                     </div>
                     <div class="col-9 gray-border">
                         <span t-field="doc.not_exceeding_estimated_volume" />
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right gray-border">
-                        First Day of Packing
+                    <div class="col-3 gray-border">
+                        First Day of Packing :
                     </div>
                     <div class="col-9 gray-border">
                         <span t-field="doc.first_day_packing" />
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right gray-border">
-                        Last Day of Packing
+                    <div class="col-3 gray-border">
+                        Last Day of Packing :
                     </div>
                     <div class="col-9 gray-border">
                         <span t-field="doc.last_day_packing" />
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right gray-border">
-                        Port to Port Transit Time
+                    <div class="col-3 gray-border">
+                        Port to Port Transit Time :
                     </div>
                     <div class="col-9 gray-border">
                         <span t-field="doc.transit_time" />
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-3 text-right gray-border">
-                        Customs clearlance
+                    <div class="col-3 gray-border">
+                        Customs clearlance :
                     </div>
                     <div class="col-9 gray-border">
                         <span t-field="doc.customs_clearlance" />
@@ -161,7 +186,7 @@
                 </div>
             </div>
             <!-- Move Cost -->
-            <div style="margin-top: 30px;">
+            <div style="margin-top: 30px;page-break-after:always;">
                 <div class="row">
                     <div class="col-12 title">
                         <strong>Move Cost</strong>
@@ -213,9 +238,10 @@
                                 <t t-set="subtotal" t-value="0" />
                                 <t t-set="number" t-value="0" />
                                 <t
-                                    t-foreach="doc.order_line.sorted('sequence')"
-                                    t-as="line"
-                                >
+                                    t-set="lines"
+                                    t-value="doc.order_line.sorted('sequence')"
+                                />
+                                <t t-foreach="lines" t-as="line">
                                     <t
                                         t-set="amount"
                                         t-value="line.product_uom_qty * line.price_unit"
@@ -320,7 +346,7 @@
                                         </t>
                                     </tr>
                                     <t
-                                        t-if="current_section and (line_last or doc.order_line[line_index+1].display_type == 'line_section')"
+                                        t-if="current_section and (line_last or lines[line_index+1].display_type == 'line_section')"
                                     >
                                         <tr>
                                             <td class="text-right" colspan="4"><strong
@@ -430,7 +456,7 @@
                                     <td class="text-right">
                                         <t
                                             t-set="amount_wt"
-                                            t-value="sum(doc.order_line.filtered('product_id.wt_tax_id').mapped(lambda l: l.product_id.wt_tax_id.amount / 100 * (l.product_uom_qty * l.price_unit)))"
+                                            t-value="sum(lines.filtered('product_id.wt_tax_id').mapped(lambda l: l.product_id.wt_tax_id.amount / 100 * (l.product_uom_qty * l.price_unit)))"
                                         />
                                         <t t-if="amount_wt">
                                             (<strong
@@ -466,7 +492,10 @@
                 </div>
             </div>
             <!-- Service Inclusions -->
-            <div style="page-break-inside: avoid;margin-top: 30px;">
+            <div
+                class="service-inclusion"
+                style="page-break-inside: avoid;margin-top: 30px;"
+            >
                 <div class="row">
                     <div class="col-12 title">
                         <strong>SERVICE INCLUSIONS:</strong>
@@ -477,7 +506,10 @@
                 </div>
             </div>
             <!-- Service Exclusions -->
-            <div style="page-break-inside: avoid;margin-top: 30px;">
+            <div
+                class="service-exclusion"
+                style="page-break-inside: avoid;margin-top: 30px;"
+            >
                 <div class="row">
                     <div class="col-12 title">
                         <strong>SERVICE EXCLUSIONS:</strong>
@@ -485,46 +517,6 @@
                 </div>
                 <div class="row">
                     <div class="col-12" t-field="doc.service_exclude_description" />
-                </div>
-            </div>
-            <!-- Payment Detail -->
-            <div style="page-break-inside: avoid;margin-top: 30px;">
-                <div class="row">
-                    <div class="col-12 title">
-                        <strong>PAYMENT DETAIL:</strong>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3">
-                        Bank Name:
-                    </div>
-                    <div class="col-9">
-                        <span t-field="company.company_bank_id.bank_id.name" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3">
-                        Account Name:
-                    </div>
-                    <div class="col-9">
-                        <span t-field="company.company_bank_id.partner_id.name" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3">
-                        Account Number:
-                    </div>
-                    <div class="col-9">
-                        <span t-field="company.company_bank_id.acc_number" />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3">
-                        Swift Code:
-                    </div>
-                    <div class="col-9">
-                        <span t-field="company.company_bank_id.bank_id.bic" />
-                    </div>
                 </div>
             </div>
             <!-- Signature -->
@@ -540,23 +532,6 @@
                         _____________________________________________<br /><br />
                         (_____________________________________________)
                     </div>
-                </div>
-            </div>
-        </div>
-        <div class="footer faf_quotation">
-            <div class="row">
-                <div class="col-6">
-                    <span t-field="company.name" /><br />
-                    <span t-field="company.partner_id.street" />
-                    <span t-field="company.partner_id.street2" />
-                    <span t-field="company.partner_id.city" />
-                    <span t-field="company.partner_id.state_id.name" />
-                    <span t-field="company.partner_id.zip" />
-                    <span t-field="company.partner_id.country_id.name" />
-                </div>
-                <div class="col-6 text-right">
-                    Tel: <span t-field="company.partner_id.phone" /><br />
-                    Email: <span t-field="company.partner_id.email" />
                 </div>
             </div>
         </div>
