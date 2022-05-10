@@ -1,0 +1,240 @@
+<odoo>
+    <template
+        id="assets_backend"
+        name="faf_sale_tax_report assets"
+        inherit_id="web.assets_backend"
+    >
+        <xpath expr="." position="inside">
+            <link
+                href="/faf_sale_tax_report/static/src/css/report.css"
+                rel="stylesheet"
+            />
+            <script
+                type="text/javascript"
+                src="/faf_sale_tax_report/static/src/js/faf_sale_tax_report_backend.js"
+            />
+        </xpath>
+    </template>
+    <template id="faf_sale_tax_report.internal_layout">
+        <div class="article">
+            <link
+                href="/faf_sale_tax_report/static/src/css/report.css"
+                rel="stylesheet"
+            />
+            <t t-raw="0" />
+        </div>
+        <div class="footer">
+            <div class="row">
+                <div class="col-6 custom_footer">
+                    <span
+                        t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d')"
+                    />
+                </div>
+                <div class="col-6 text-right custom_footer">
+                    <span class="page" />
+                    /
+                    <span class="topage" />
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="faf_sale_tax_report.report_buttons">
+        <div class="button_row">
+            <button class="o_faf_sale_tax_report_print btn btn-sm oe_button">
+                <span class="fa fa-print" />
+                Print
+            </button>
+            <button class="o_faf_sale_tax_report_export btn btn-sm oe_button">
+                <span class="fa fa-download" />
+                Export
+            </button>
+        </div>
+    </template>
+    <template id="faf_sale_tax_report.report_sale_tax_report_html">
+        <div class="o_faf_sale_tax_report_page">
+            <t t-call="faf_sale_tax_report.report_buttons" />
+            <t t-call="faf_sale_tax_report.report_sale_tax_report_base" />
+        </div>
+    </template>
+    <template id="faf_sale_tax_report.report_sale_tax_report_pdf">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="faf_sale_tax_report.internal_layout">
+                    <t t-call="faf_sale_tax_report.report_sale_tax_report_base" />
+                </t>
+            </t>
+        </t>
+    </template>
+    <template id="faf_sale_tax_report.report_sale_tax_report_base">
+        <div class="page">
+            <!-- Display Title -->
+            <div class="row">
+                <h4 class="mt0" style="text-align: center;">Sale Tax Report</h4>
+            </div>
+            <!-- Display filters -->
+            <t t-call="faf_sale_tax_report.report_sale_tax_report_filters" />
+            <!-- Display sale tax report table -->
+            <div class="act_as_table data_table mt8" style="width: 100%;">
+                <!-- Display header line-->
+                <t t-call="faf_sale_tax_report.report_sale_tax_report_lines_header" />
+                <!-- Display each lines -->
+                <t t-set="n" t-value="1" />
+                <t t-set="total_base_no_vat" t-value="0.00" />
+                <t t-set="total_base_vat" t-value="0.00" />
+                <t t-set="total_tax_amount" t-value="0.00" />
+                <t t-foreach="o.results" t-as="line">
+                    <!-- Get all account.move -->
+                    <t
+                        t-set="full_reconcile"
+                        t-value="line.move_id.line_ids.mapped('full_reconcile_id')"
+                    />
+                    <t t-if="full_reconcile and len(full_reconcile) == 1">
+                        <t
+                            t-set="moves"
+                            t-value="full_reconcile.reconciled_line_ids.filtered(lambda l: l.move_id != line.move_id).mapped('move_id')"
+                        />
+                    </t>
+                    <t t-else="">
+                        <t t-set="moves" t-value="line.env['account.move']" />
+                        <t
+                            t-foreach="line.move_id._get_reconciled_invoices_partials()"
+                            t-as="rec"
+                        >
+                            <t t-set="moves" t-value="moves + rec[2].move_id" />
+                        </t>
+                    </t>
+                    <!-- Calculate Base No Vat, Base Vat, Tax Amount -->
+                    <t t-set="inv_lines" t-value="moves.mapped('invoice_line_ids')" />
+                    <t
+                        t-set="base_no_vat_inv_lines"
+                        t-value="inv_lines.filtered(lambda k: not k.tax_ids or not k.tax_ids.filtered(lambda l: l.amount))"
+                    />
+                    <t
+                        t-set="base_vat_inv_lines"
+                        t-value="inv_lines.filtered(lambda k: k.tax_ids and k.tax_ids.filtered(lambda l: l.amount))"
+                    />
+                    <t
+                        t-set="base_no_vat"
+                        t-value="sum([(line.move_id.move_type == 'out_refund' and -1 or 1) * line.quantity * line.price_unit for line in base_no_vat_inv_lines])"
+                    />
+                    <t
+                        t-set="base_vat"
+                        t-value="sum([(line.move_id.move_type == 'out_refund' and -1 or 1) * line.quantity * line.price_unit for line in base_vat_inv_lines])"
+                    />
+                    <t
+                        t-set="tax_amount"
+                        t-value="sum([(move.move_type == 'out_refund' and -1 or 1) * move.amount_tax for move in moves])"
+                    />
+                    <t
+                        t-set="total_base_no_vat"
+                        t-value="total_base_no_vat + base_no_vat"
+                    />
+                    <t t-set="total_base_vat" t-value="total_base_vat + base_vat" />
+                    <t
+                        t-set="total_tax_amount"
+                        t-value="total_tax_amount + tax_amount"
+                    />
+                    <!---->
+                    <t t-call="faf_sale_tax_report.report_sale_tax_report_lines" />
+                    <t t-set="n" t-value="n+1" />
+                </t>
+                <!-- Display total lines -->
+                <t t-call="faf_sale_tax_report.report_sale_tax_report_total_lines" />
+            </div>
+        </div>
+    </template>
+    <template id="faf_sale_tax_report.report_sale_tax_report_filters">
+        <div class="act_as_table data_table" style="width: 100%;">
+            <div class="act_as_row labels">
+                <div class="act_as_cell">Period</div>
+                <div class="act_as_cell">Date From</div>
+                <div class="act_as_cell">Date To</div>
+                <div class="act_as_cell">Journal</div>
+            </div>
+            <div class="act_as_row">
+                <div class="act_as_cell">
+                    <span t-field="o.date_range_id.name" />
+                </div>
+                <div class="act_as_cell">
+                    <span t-field="o.date_from" />
+                </div>
+                <div class="act_as_cell">
+                    <span t-field="o.date_to" />
+                </div>
+                <div class="act_as_cell">
+                    <span t-field="o.journal_id.name" />
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="faf_sale_tax_report.report_sale_tax_report_lines_header">
+        <div class="act_as_thead">
+            <div class="act_as_row labels">
+                <div class="act_as_cell" style="width:4%;">#</div>
+                <div class="act_as_cell" style="width:10%;">Date</div>
+                <div class="act_as_cell" style="width:12%;">Number</div>
+                <div class="act_as_cell">Customer</div>
+                <div class="act_as_cell" style="width:10%;">Tax ID</div>
+                <div class="act_as_cell" style="width:5%;">Branch ID</div>
+                <div class="act_as_cell">Base No Vat</div>
+                <div class="act_as_cell">Base Vat</div>
+                <div class="act_as_cell">Tax Amount</div>
+                <div class="act_as_cell">Doc Ref.</div>
+            </div>
+        </div>
+    </template>
+    <template id="faf_sale_tax_report.report_sale_tax_report_lines">
+        <div class="act_as_row lines">
+            <div class="act_as_cell left">
+                <t t-esc="n" />
+            </div>
+            <div class="act_as_cell left">
+                <t t-esc="line.date.strftime('%d/%m/%Y')" />
+            </div>
+            <div class="act_as_cell left">
+                <t t-esc="line.name" />
+            </div>
+            <div class="act_as_cell left">
+                <t t-esc="line.partner_id.name" />
+            </div>
+            <div class="act_as_cell left">
+                <t t-esc="line.partner_id.vat" />
+            </div>
+            <div class="act_as_cell left">
+                <t t-esc="line.partner_id.branch" />
+            </div>
+            <div class="act_as_cell amount">
+                <t t-esc="'{0:,.2f}'.format(base_no_vat)" />
+            </div>
+            <div class="act_as_cell amount">
+                <t t-esc="'{0:,.2f}'.format(base_vat)" />
+            </div>
+            <div class="act_as_cell amount">
+                <t t-esc="'{0:,.2f}'.format(tax_amount)" />
+            </div>
+            <div class="act_as_cell left">
+                <t t-esc="', '.join(moves.mapped('name'))" />
+            </div>
+        </div>
+    </template>
+    <template id="faf_sale_tax_report.report_sale_tax_report_total_lines">
+        <div class="act_as_row totals_table">
+            <div class="act_as_cell" />
+            <div class="act_as_cell" />
+            <div class="act_as_cell" />
+            <div class="act_as_cell" />
+            <div class="act_as_cell" />
+            <div class="act_as_cell" />
+            <div class="act_as_cell amount">
+                <t t-esc="'{0:,.2f}'.format(total_base_no_vat)" />
+            </div>
+            <div class="act_as_cell amount">
+                <t t-esc="'{0:,.2f}'.format(total_base_vat)" />
+            </div>
+            <div class="act_as_cell amount">
+                <t t-esc="'{0:,.2f}'.format(total_tax_amount)" />
+            </div>
+            <div class="act_as_cell" />
+        </div>
+    </template>
+</odoo>
