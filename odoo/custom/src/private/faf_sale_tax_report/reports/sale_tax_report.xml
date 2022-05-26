@@ -146,12 +146,25 @@
     <template id="faf_sale_tax_report.report_sale_tax_report_filters">
         <div class="act_as_table data_table" style="width: 100%;">
             <div class="act_as_row labels">
+                <div class="act_as_cell">Partner</div>
+                <div class="act_as_cell">Tax ID</div>
+                <div class="act_as_cell">Branch ID</div>
                 <div class="act_as_cell">Period</div>
                 <div class="act_as_cell">Date From</div>
                 <div class="act_as_cell">Date To</div>
                 <div class="act_as_cell">Journal</div>
             </div>
             <div class="act_as_row">
+                <t t-set="company" t-value="o.env.company" />
+                <div class="act_as_cell">
+                    <span t-field="company.display_name" />
+                </div>
+                <div class="act_as_cell">
+                    <span t-field="company.partner_id.vat" />
+                </div>
+                <div class="act_as_cell">
+                    <span t-field="company.partner_id.branch" />
+                </div>
                 <div class="act_as_cell">
                     <span t-field="o.date_range_id.name" />
                 </div>
@@ -170,15 +183,16 @@
     <template id="faf_sale_tax_report.report_sale_tax_report_lines_header">
         <div class="act_as_thead">
             <div class="act_as_row labels">
-                <div class="act_as_cell" style="width:4%;">#</div>
+                <div class="act_as_cell" style="width:4%;">No.</div>
                 <div class="act_as_cell" style="width:10%;">Date</div>
                 <div class="act_as_cell" style="width:12%;">Number</div>
                 <div class="act_as_cell">Customer</div>
                 <div class="act_as_cell" style="width:10%;">Tax ID</div>
                 <div class="act_as_cell" style="width:5%;">Branch ID</div>
-                <div class="act_as_cell">Base No Vat</div>
-                <div class="act_as_cell">Base Vat</div>
+                <div class="act_as_cell">Non Vat</div>
+                <div class="act_as_cell">Base Amount</div>
                 <div class="act_as_cell">Tax Amount</div>
+                <div class="act_as_cell">Total</div>
                 <div class="act_as_cell">Doc Ref.</div>
             </div>
         </div>
@@ -212,6 +226,9 @@
             <div class="act_as_cell amount">
                 <t t-esc="'{0:,.2f}'.format(tax_amount)" />
             </div>
+            <div class="act_as_cell amount">
+                <t t-esc="'{0:,.2f}'.format(base_no_vat + base_vat + tax_amount)" />
+            </div>
             <div class="act_as_cell left">
                 <t t-esc="', '.join(moves.mapped('name'))" />
             </div>
@@ -233,6 +250,11 @@
             </div>
             <div class="act_as_cell amount">
                 <t t-esc="'{0:,.2f}'.format(total_tax_amount)" />
+            </div>
+            <div class="act_as_cell amount">
+                <t
+                    t-esc="'{0:,.2f}'.format(total_base_no_vat + total_base_vat + total_tax_amount)"
+                />
             </div>
             <div class="act_as_cell" />
         </div>

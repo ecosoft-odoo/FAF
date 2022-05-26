@@ -16,53 +16,53 @@ class ReportSaleTaxReportXlsx(models.TransientModel):
 
     def _get_ws_params(self, wb, data, objects):
         sale_tax_template = {
-            "0_index": {
-                "header": {"value": "#"},
+            "01_index": {
+                "header": {"value": "No."},
                 "data": {"value": self._render("row_pos")},
                 "width": 5,
             },
-            "1_date": {
+            "02_date": {
                 "header": {"value": "Date"},
                 "data": {"value": self._render("date")},
                 "width": 12,
             },
-            "2_number": {
+            "03_number": {
                 "header": {"value": "Number"},
                 "data": {"value": self._render("number")},
                 "width": 18,
             },
-            "3_partner_name": {
+            "04_partner_name": {
                 "header": {"value": "Customer"},
                 "data": {"value": self._render("partner_name")},
                 "width": 30,
             },
-            "4_partner_vat": {
+            "05_partner_vat": {
                 "header": {"value": "Tax ID"},
                 "data": {"value": self._render("partner_vat")},
                 "width": 15,
             },
-            "5_partner_branch": {
+            "06_partner_branch": {
                 "header": {"value": "Branch ID"},
                 "data": {"value": self._render("partner_branch")},
                 "width": 12,
             },
-            "6_base_no_vat": {
-                "header": {"value": "Base No Vat"},
+            "07_base_no_vat": {
+                "header": {"value": "Non Vat"},
                 "data": {
                     "value": self._render("base_no_vat"),
                     "format": FORMATS["format_tcell_amount_right"],
                 },
                 "width": 21,
             },
-            "7_base_vat": {
-                "header": {"value": "Base Vat"},
+            "08_base_vat": {
+                "header": {"value": "Base Amount"},
                 "data": {
                     "value": self._render("base_vat"),
                     "format": FORMATS["format_tcell_amount_right"],
                 },
                 "width": 21,
             },
-            "8_tax_amount": {
+            "09_tax_amount": {
                 "header": {"value": "Tax Amount"},
                 "data": {
                     "value": self._render("tax_amount"),
@@ -70,7 +70,15 @@ class ReportSaleTaxReportXlsx(models.TransientModel):
                 },
                 "width": 21,
             },
-            "9_doc_ref": {
+            "10_total": {
+                "header": {"value": "Total"},
+                "data": {
+                    "value": self._render("total"),
+                    "format": FORMATS["format_tcell_amount_right"],
+                },
+                "width": 21,
+            },
+            "11_doc_ref": {
                 "header": {"value": "Doc Ref."},
                 "data": {"value": self._render("doc_ref")},
                 "width": 18,
@@ -95,30 +103,39 @@ class ReportSaleTaxReportXlsx(models.TransientModel):
         # title
         row_pos = self._write_ws_title(ws, row_pos, ws_params, True)
         # company data
+        company = objects.env.company
         ws.write_column(
             row_pos,
             1,
-            ["Period :", "Date From :", "Date To :"],
+            ["Partner :", "Tax ID :", "Branch ID :"],
             FORMATS["format_left_bold"],
         )
         ws.write_column(
             row_pos,
             2,
             [
-                (objects.date_range_id.name) or "",
-                (objects.date_from.strftime("%d/%m/%Y")) or "",
-                (objects.date_to.strftime("%d/%m/%Y")) or "",
+                (company.display_name) or "",
+                (company.partner_id.vat) or "",
+                (company.partner_id.branch) or "",
             ],
         )
-        ws.write_column(row_pos, 5, ["Journal :"], FORMATS["format_left_bold"])
+        ws.write_column(
+            row_pos,
+            5,
+            ["Period :", "Date From :", "Date To :", "Journal :"],
+            FORMATS["format_left_bold"],
+        )
         ws.write_column(
             row_pos,
             6,
             [
+                (objects.date_range_id.name) or "",
+                (objects.date_from.strftime("%d/%m/%Y")) or "",
+                (objects.date_to.strftime("%d/%m/%Y")) or "",
                 (objects.journal_id.name) or "",
             ],
         )
-        row_pos += 4
+        row_pos += 5
         # sale tax report table
         row_pos = self._write_line(
             ws,
@@ -184,7 +201,7 @@ class ReportSaleTaxReportXlsx(models.TransientModel):
                     ws_params,
                     col_specs_section="data",
                     render_space={
-                        "row_pos": row_pos - 6,
+                        "row_pos": row_pos - 7,
                         "date": line.date.strftime("%d/%m/%Y") or "",
                         "number": line.name or "",
                         "partner_name": line.partner_id.name or "",
@@ -193,6 +210,7 @@ class ReportSaleTaxReportXlsx(models.TransientModel):
                         "base_no_vat": base_no_vat,
                         "base_vat": base_vat,
                         "tax_amount": tax_amount,
+                        "total": base_no_vat + base_vat + tax_amount,
                         "doc_ref": ", ".join(moves.mapped("name")),
                     },
                     default_format=FORMATS["format_tcell_left"],
@@ -200,6 +218,11 @@ class ReportSaleTaxReportXlsx(models.TransientModel):
         ws.write_row(
             row_pos,
             6,
-            [total_base_no_vat, total_base_vat, total_tax_amount],
+            [
+                total_base_no_vat,
+                total_base_vat,
+                total_tax_amount,
+                total_base_no_vat + total_base_vat + total_tax_amount,
+            ],
             FORMATS["format_theader_blue_amount_right"],
         )

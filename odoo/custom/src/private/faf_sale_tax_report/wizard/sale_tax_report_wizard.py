@@ -44,7 +44,7 @@ class SaleTaxReportWizard(models.TransientModel):
             dom += [("date", "<=", self.date_to)]
         if self.journal_id:
             dom += [("journal_id", "=", self.journal_id.id)]
-        self.results = Payment.search(dom)
+        self.results = Payment.search(dom, order="date, name")
 
     @api.onchange("date_range_id")
     def _onchange_date_range_id(self):
