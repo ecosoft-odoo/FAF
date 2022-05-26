@@ -15,17 +15,17 @@
                                 alt="Logo"
                             />
                         </div>
-                        <div class="col-7">
+                        <div class="col-7" style="padding-left: 40px;">
                             <span style="font-size: 12pt;" t-field="company.name" /><br
                             />
                             <span
-                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.country_id.name, company.zip])))"
+                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.zip, company.country_id.name])))"
                             /><br />
                             <span t-esc="'Tax ID : %s' % company.vat" />
                         </div>
                         <div class="col-3" style="padding-right: 0px;">
                             <span
-                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch)"
+                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch or '')"
                             /><br />
                             <span t-esc="'Tel : %s' % company.phone" /><br />
                             <span t-esc="'Email : %s' % company.email" />
@@ -33,19 +33,21 @@
                     </div>
                 </div>
             </div>
-            <div style="page-break-inside: avoid;margin-top: 20px;">
+            <div
+                style="page-break-inside: avoid;margin-top: 40px;font-size: 18px;line-height: 35px;"
+            >
                 <div class="row">
-                    <div class="col-2">
+                    <div class="col-2" style="padding-top: 8px;">
                         Payment Date :
                     </div>
-                    <div class="col-4">
+                    <div class="col-4" style="padding-top: 8px;">
                         <span t-field="doc.date" />
                     </div>
-                    <div class="col-3">
-                        Payment Receipt :
+                    <div class="col-3" style="font-size: 25px;">
+                        <strong>Payment Receipt :</strong>
                     </div>
-                    <div class="col-3">
-                        <span t-field="doc.name" />
+                    <div class="col-3" style="font-size: 25px;">
+                        <strong t-field="doc.name" />
                     </div>
                 </div>
                 <div class="row">
@@ -85,7 +87,7 @@
                         <span t-field="doc.ref" />
                     </div>
                 </div>
-                <table class="table table-sm" style="margin-top: 20px;">
+                <table class="table table-sm" style="margin-top: 40px;">
                     <thead>
                         <tr>
                             <th class="text-center">Invoice Date</th>
@@ -163,7 +165,7 @@
                 </div>
             </div>
         </div>
-        <div class="footer">
+        <div class="footer" style="font-size: 17px;">
             <div class="text-center row">
                 <div class="col-3">
                     <div style="border-top: 1px solid black;">

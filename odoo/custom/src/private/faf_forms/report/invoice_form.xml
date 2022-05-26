@@ -15,17 +15,17 @@
                                 alt="Logo"
                             />
                         </div>
-                        <div class="col-7">
+                        <div class="col-7" style="padding-left: 40px;">
                             <span style="font-size: 12pt;" t-field="company.name" /><br
                             />
                             <span
-                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.country_id.name, company.zip])))"
+                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.zip, company.country_id.name])))"
                             /><br />
                             <span t-esc="'Tax ID : %s' % company.vat" />
                         </div>
                         <div class="col-3" style="padding-right: 0px;">
                             <span
-                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch)"
+                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch or '')"
                             /><br />
                             <span t-esc="'Tel : %s' % company.phone" /><br />
                             <span t-esc="'Email : %s' % company.email" />
@@ -33,7 +33,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" style="margin-top: 30px;">
                 <div class="col-12 text-right title">
                     <strong style="font-size: 22pt;">INVOICE</strong>
                 </div>
@@ -129,53 +129,6 @@
                     <div class="col-10 detail white-border no-right-border">
                         <span
                             t-esc="', '.join(filter(lambda l: l, order.mapped('subject')))"
-                        />
-                    </div>
-                </div>
-            </div>
-            <div style="page-break-inside: avoid;margin-top: 30px;">
-                <div class="row">
-                    <div class="col-12 title">
-                        <strong>Move Details</strong>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3 gray-border">
-                        Relocation From :
-                    </div>
-                    <div class="col-9 gray-border">
-                        <span
-                            t-esc="', '.join(filter(lambda l: l, order.mapped('relocation_from')))"
-                        />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3 gray-border">
-                        Relocation To :
-                    </div>
-                    <div class="col-9 gray-border">
-                        <span
-                            t-esc="', '.join(filter(lambda l: l, order.mapped('relocation_to')))"
-                        />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3 gray-border">
-                        Mode of Shipment :
-                    </div>
-                    <div class="col-9 gray-border">
-                        <span
-                            t-esc="', '.join(filter(lambda l: l, order.mapped('mode_shipment')))"
-                        />
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-3 gray-border">
-                        Estimated Volume :
-                    </div>
-                    <div class="col-9 gray-border">
-                        <span
-                            t-esc="', '.join(filter(lambda l: l, order.mapped('not_exceeding_estimated_volume')))"
                         />
                     </div>
                 </div>

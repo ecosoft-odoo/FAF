@@ -15,17 +15,17 @@
                                 alt="Logo"
                             />
                         </div>
-                        <div class="col-7">
+                        <div class="col-7" style="padding-left: 40px;">
                             <span style="font-size: 12pt;" t-field="company.name" /><br
                             />
                             <span
-                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.country_id.name, company.zip])))"
+                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.zip, company.country_id.name])))"
                             /><br />
                             <span t-esc="'Tax ID : %s' % company.vat" />
                         </div>
                         <div class="col-3" style="padding-right: 0px;">
                             <span
-                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch)"
+                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch or '')"
                             /><br />
                             <span t-esc="'Tel : %s' % company.phone" /><br />
                             <span t-esc="'Email : %s' % company.email" />
@@ -33,7 +33,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row">
+            <div class="row" style="margin-top: 30px;">
                 <div class="col-12 text-right title">
                     <strong style="font-size: 22pt;">RECEIPT</strong>
                 </div>

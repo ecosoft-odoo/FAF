@@ -15,17 +15,17 @@
                                 alt="Logo"
                             />
                         </div>
-                        <div class="col-7">
+                        <div class="col-7" style="padding-left: 40px;">
                             <span style="font-size: 12pt;" t-field="company.name" /><br
                             />
                             <span
-                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.country_id.name, company.zip])))"
+                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.zip, company.country_id.name])))"
                             /><br />
                             <span t-esc="'Tax ID : %s' % company.vat" />
                         </div>
                         <div class="col-3" style="padding-right: 0px;">
                             <span
-                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch)"
+                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch or '')"
                             /><br />
                             <span t-esc="'Tel : %s' % company.phone" /><br />
                             <span t-esc="'Email : %s' % company.email" />
@@ -33,19 +33,21 @@
                     </div>
                 </div>
             </div>
-            <div style="page-break-inside: avoid;margin-top: 30px;">
+            <div
+                style="page-break-inside: avoid;margin-top: 30px;font-size: 16px;line-height: 35px;"
+            >
                 <div class="row">
-                    <div class="col-2">
+                    <div class="col-2" style="padding-top: 8px;">
                         Invoice Date :
                     </div>
-                    <div class="col-4">
+                    <div class="col-4" style="padding-top: 8px;">
                         <span t-field="doc.invoice_date" />
                     </div>
-                    <div class="col-3">
-                        Vendor Bill :
+                    <div class="col-3" style="font-size: 25px;">
+                        <strong>Vendor Bill :</strong>
                     </div>
-                    <div class="col-3">
-                        <span t-field="doc.name" />
+                    <div class="col-3" style="font-size: 25px;">
+                        <strong t-field="doc.name" />
                     </div>
                 </div>
                 <div class="row">
@@ -99,14 +101,51 @@
                     </thead>
                     <tbody>
                         <t t-set="current_total" t-value="0" />
+                        <t t-set="price_total" t-value="0" />
+                        <t t-set="tax_amount_total" t-value="0" />
+                        <t t-set="wt_amount_total" t-value="0" />
+                        <t t-set="paid_amount_total" t-value="0" />
                         <t
                             t-set="lines"
                             t-value="doc.invoice_line_ids.sorted('sequence')"
                         />
                         <t t-foreach="lines" t-as="line">
                             <t
+                                t-set="price"
+                                t-value="line.quantity * line.price_unit"
+                            />
+                            <t
+                                t-set="tax_percents"
+                                t-value="line.tax_ids.mapped('amount')"
+                            />
+                            <t
+                                t-set="tax_amount"
+                                t-value="sum(list(map(lambda t: price * t / 100 ,tax_percents)))"
+                            />
+                            <t
+                                t-set="wt_amount"
+                                t-value="price * line.wt_tax_id.amount / 100"
+                            />
+                            <t
+                                t-set="paid_amount"
+                                t-value="price + tax_amount - wt_amount"
+                            />
+                            <t
                                 t-set="current_total"
-                                t-value="current_total + line.price_total"
+                                t-value="current_total + paid_amount"
+                            />
+                            <t t-set="price_total" t-value="price_total + price" />
+                            <t
+                                t-set="tax_amount_total"
+                                t-value="tax_amount_total + tax_amount"
+                            />
+                            <t
+                                t-set="wt_amount_total"
+                                t-value="wt_amount_total + wt_amount"
+                            />
+                            <t
+                                t-set="paid_amount_total"
+                                t-value="paid_amount_total + paid_amount"
                             />
                             <tr
                                 t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''"
@@ -122,18 +161,28 @@
                                         <span t-field="line.name" />
                                     </td>
                                     <td class="text-right">
-                                        <span t-field="line.price_subtotal" />
-                                    </td>
-                                    <td>
                                         <span
-                                            t-esc="', '.join(line.tax_ids.mapped('name'))"
+                                            t-esc="price"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
                                         />
                                     </td>
-                                    <td>
-                                        <span t-field="line.wt_tax_id.name" />
+                                    <td class="text-right">
+                                        <span
+                                            t-esc="tax_amount"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
                                     </td>
                                     <td class="text-right">
-                                        <span t-field="line.price_total" />
+                                        <span
+                                            t-esc="wt_amount"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                    <td class="text-right">
+                                        <span
+                                            t-esc="paid_amount"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
                                     </td>
                                 </t>
                                 <t t-if="line.display_type == 'line_section'">
@@ -183,20 +232,27 @@
                                     <td class="text-right">
                                         <span
                                             class="text-nowrap"
-                                            t-field="doc.amount_total"
+                                            t-esc="price_total"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>VAT 7%</strong></td>
+                                    <td class="text-right">
+                                        <span
+                                            class="text-nowrap"
+                                            t-esc="tax_amount_total"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
                                         />
                                     </td>
                                 </tr>
                                 <tr>
                                     <td><strong>WHT</strong></td>
                                     <td class="text-right">
-                                        <t
-                                            t-set="amount_wt"
-                                            t-value="sum(doc.line_ids.filtered('wt_tax_id').mapped(lambda l: l.wt_tax_id.amount / 100 * l.amount_currency))"
-                                        />
                                         <span
                                             class="text-nowrap"
-                                            t-esc="-1 * abs(amount_wt)"
+                                            t-esc="wt_amount_total"
                                             t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
                                         />
                                     </td>
@@ -206,7 +262,7 @@
                                     <td class="text-right">
                                         <span
                                             class="text-nowrap"
-                                            t-esc="doc.amount_total - amount_wt"
+                                            t-esc="paid_amount_total"
                                             t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
                                         />
                                     </td>
@@ -217,7 +273,7 @@
                 </div>
             </div>
         </div>
-        <div class="footer">
+        <div class="footer" style="font-size: 16px;">
             <div class="text-center row">
                 <div class="col-3">
                     <div style="border-top: 1px solid black;">
