@@ -1,0 +1,211 @@
+<odoo>
+    <!--Copyright 2021 Ecosoft Co., Ltd (http://ecosoft.co.th)-->
+    <template id="report_payment_receipt_document">
+        <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
+        <div class="article faf_payment">
+            <div class="row">
+                <div class="col-12">
+                    <div class="row">
+                        <t t-set="company" t-value="doc.company_id" />
+                        <div class="col-2">
+                            <img
+                                t-if="company.logo"
+                                t-att-src="image_data_uri(company.logo)"
+                                class="logo"
+                                alt="Logo"
+                            />
+                        </div>
+                        <div class="col-7" style="padding-left: 40px;">
+                            <span style="font-size: 12pt;" t-field="company.name" /><br
+                            />
+                            <span
+                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.zip, company.country_id.name])))"
+                            /><br />
+                            <span t-esc="'Tax ID : %s' % company.vat" />
+                        </div>
+                        <div class="col-3" style="padding-right: 0px;">
+                            <span
+                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch or '')"
+                            /><br />
+                            <span t-esc="'Tel : %s' % company.phone" /><br />
+                            <span t-esc="'Email : %s' % company.email" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                style="page-break-inside: avoid;margin-top: 40px;font-size: 18px;line-height: 35px;"
+            >
+                <div class="row">
+                    <div class="col-2" style="padding-top: 8px;">
+                        Payment Date :
+                    </div>
+                    <div class="col-4" style="padding-top: 8px;">
+                        <span t-field="doc.date" />
+                    </div>
+                    <div class="col-3" style="font-size: 25px;">
+                        <strong>Payment Receipt :</strong>
+                    </div>
+                    <div class="col-3" style="font-size: 25px;">
+                        <strong t-field="doc.name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        Vendor :
+                    </div>
+                    <div class="col-10">
+                        <span t-field="doc.partner_id.name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        Address :
+                    </div>
+                    <div class="col-10">
+                        <span t-field="doc.partner_id.street" />
+                        <span t-field="doc.partner_id.street2" />
+                        <span t-field="doc.partner_id.city" />
+                        <span t-field="doc.partner_id.state_id.name" />
+                        <span t-field="doc.partner_id.zip" />
+                        <span t-field="doc.partner_id.country_id.name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        Tax ID :
+                    </div>
+                    <div class="col-10">
+                        <span t-field="doc.partner_id.vat" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        Memo :
+                    </div>
+                    <div class="col-10">
+                        <span t-field="doc.ref" />
+                    </div>
+                </div>
+                <table class="table table-sm" style="margin-top: 40px;">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Invoice Date</th>
+                            <th class="text-center">Number</th>
+                            <th class="text-center">Reference</th>
+                            <th class="text-center">Amount Paid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-set="total" t-value="0" />
+                        <t t-set="amount_wt" t-value="0" />
+                        <tr
+                            t-foreach="doc.move_id._get_reconciled_invoices_partials()"
+                            t-as="rec"
+                        >
+                            <t t-set="amount" t-value="rec[1]" />
+                            <t t-set="inv" t-value="rec[2].move_id" />
+                            <t t-if="inv.move_type != 'entry'">
+                                <td><span t-field="inv.invoice_date" /></td>
+                                <td><span t-field="inv.name" /></td>
+                                <td><span t-field="inv.ref" /></td>
+                                <td class="text-right"><span
+                                        t-esc="amount"
+                                        t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                    /></td>
+                                <t t-set="total" t-value="total + amount" />
+                                <t
+                                    t-set="amount_wt"
+                                    t-value="amount_wt + sum(inv.line_ids.filtered('wt_tax_id').mapped(lambda l: l.wt_tax_id.amount / 100 * l.amount_currency))"
+                                />
+                            </t>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="clearfix">
+                    <div class="row">
+                        <div class="col-6 ml-auto">
+                            <table
+                                class="table table-sm"
+                                style="page-break-inside: avoid;"
+                            >
+                                <tr class="border-black o_total">
+                                    <td><strong>Total</strong></td>
+                                    <td class="text-right">
+                                        <span
+                                            class="text-nowrap"
+                                            t-esc="total"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>WHT</strong></td>
+                                    <td class="text-right">
+                                        <span
+                                            class="text-nowrap"
+                                            t-esc="-1 * abs(amount_wt)"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr class="border-black o_total">
+                                    <td><strong>Payment Amount</strong></td>
+                                    <td class="text-right">
+                                        <span
+                                            class="text-nowrap"
+                                            t-esc="total - amount_wt"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer" style="font-size: 17px;">
+            <div class="text-center row">
+                <div class="col-3">
+                    <div style="border-top: 1px solid black;">
+                        <br />
+                        ชื่อผู้จัดทำ (Creator)<br /><br />
+                        ________/________/________
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div style="border-top: 1px solid black;">
+                        <br />
+                        ชื่อผู้ตรวจสอบ (Audit By)<br /><br />
+                        ________/________/________
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div style="border-top: 1px solid black;">
+                        <br />
+                        ชื่อผู้อนุมัติ / Approved By<br /><br />
+                        ________/________/________
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div style="border-top: 1px solid black;">
+                        <br />
+                        ชื่อผู้รับ (Receiver Name)<br /><br />
+                        ________/________/________
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="report_payment_receipt">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t
+                    t-call="faf_forms.report_payment_receipt_document"
+                    t-lang="doc.partner_id.lang"
+                />
+            </t>
+        </t>
+    </template>
+</odoo>

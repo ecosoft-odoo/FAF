@@ -1,0 +1,319 @@
+<odoo>
+    <!--Copyright 2021 Ecosoft Co., Ltd (http://ecosoft.co.th)-->
+    <template id="report_vendor_bill_document">
+        <t t-set="doc" t-value="doc.with_context(lang=doc.partner_id.lang)" />
+        <div class="article faf_vendor_bill">
+            <div class="row">
+                <div class="col-12">
+                    <div class="row">
+                        <t t-set="company" t-value="doc.company_id" />
+                        <div class="col-2">
+                            <img
+                                t-if="company.logo"
+                                t-att-src="image_data_uri(company.logo)"
+                                class="logo"
+                                alt="Logo"
+                            />
+                        </div>
+                        <div class="col-7" style="padding-left: 40px;">
+                            <span style="font-size: 12pt;" t-field="company.name" /><br
+                            />
+                            <span
+                                t-esc="', '.join(list(filter(lambda l: l, [company.street, company.street2, company.city, company.zip, company.country_id.name])))"
+                            /><br />
+                            <span t-esc="'Tax ID : %s' % company.vat" />
+                        </div>
+                        <div class="col-3" style="padding-right: 0px;">
+                            <span
+                                t-esc="'Branch : %s' % (company.branch == '0000' and 'Head Office' or company.branch or '')"
+                            /><br />
+                            <span t-esc="'Tel : %s' % company.phone" /><br />
+                            <span t-esc="'Email : %s' % company.email" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div
+                style="page-break-inside: avoid;margin-top: 30px;font-size: 16px;line-height: 35px;"
+            >
+                <div class="row">
+                    <div class="col-2" style="padding-top: 8px;">
+                        Invoice Date :
+                    </div>
+                    <div class="col-4" style="padding-top: 8px;">
+                        <span t-field="doc.invoice_date" />
+                    </div>
+                    <div class="col-3" style="font-size: 25px;">
+                        <strong>Vendor Bill :</strong>
+                    </div>
+                    <div class="col-3" style="font-size: 25px;">
+                        <strong t-field="doc.name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        Vendor :
+                    </div>
+                    <div class="col-10">
+                        <span t-field="doc.partner_id.name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        Address :
+                    </div>
+                    <div class="col-10">
+                        <span t-field="doc.partner_id.street" />
+                        <span t-field="doc.partner_id.street2" />
+                        <span t-field="doc.partner_id.city" />
+                        <span t-field="doc.partner_id.state_id.name" />
+                        <span t-field="doc.partner_id.zip" />
+                        <span t-field="doc.partner_id.country_id.name" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        Tax ID :
+                    </div>
+                    <div class="col-10">
+                        <span t-field="doc.partner_id.vat" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2">
+                        Reference :
+                    </div>
+                    <div class="col-10">
+                        <span t-field="doc.ref" />
+                    </div>
+                </div>
+                <table class="table table-sm o_main_table" style="margin-top: 30px;">
+                    <thead>
+                        <tr>
+                            <th class="text-center">Account</th>
+                            <th class="text-center">Analytic Account</th>
+                            <th class="text-center">Description</th>
+                            <th class="text-center">Price</th>
+                            <th class="text-center">Taxes</th>
+                            <th class="text-center">WHT</th>
+                            <th class="text-center">Amount Paid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-set="current_total" t-value="0" />
+                        <t t-set="price_total" t-value="0" />
+                        <t t-set="tax_amount_total" t-value="0" />
+                        <t t-set="wt_amount_total" t-value="0" />
+                        <t t-set="paid_amount_total" t-value="0" />
+                        <t
+                            t-set="lines"
+                            t-value="doc.invoice_line_ids.sorted('sequence')"
+                        />
+                        <t t-foreach="lines" t-as="line">
+                            <t
+                                t-set="price"
+                                t-value="line.quantity * line.price_unit"
+                            />
+                            <t
+                                t-set="tax_percents"
+                                t-value="line.tax_ids.mapped('amount')"
+                            />
+                            <t
+                                t-set="tax_amount"
+                                t-value="sum(list(map(lambda t: price * t / 100 ,tax_percents)))"
+                            />
+                            <t
+                                t-set="wt_amount"
+                                t-value="price * line.wt_tax_id.amount / 100"
+                            />
+                            <t
+                                t-set="paid_amount"
+                                t-value="price + tax_amount - wt_amount"
+                            />
+                            <t
+                                t-set="current_total"
+                                t-value="current_total + paid_amount"
+                            />
+                            <t t-set="price_total" t-value="price_total + price" />
+                            <t
+                                t-set="tax_amount_total"
+                                t-value="tax_amount_total + tax_amount"
+                            />
+                            <t
+                                t-set="wt_amount_total"
+                                t-value="wt_amount_total + wt_amount"
+                            />
+                            <t
+                                t-set="paid_amount_total"
+                                t-value="paid_amount_total + paid_amount"
+                            />
+                            <tr
+                                t-att-class="'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''"
+                            >
+                                <t t-if="not line.display_type">
+                                    <td>
+                                        <span t-field="line.account_id.code" />
+                                    </td>
+                                    <td>
+                                        <span t-field="line.analytic_account_id.name" />
+                                    </td>
+                                    <td>
+                                        <span t-field="line.name" />
+                                    </td>
+                                    <td class="text-right">
+                                        <span
+                                            t-esc="price"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                    <td class="text-right">
+                                        <span
+                                            t-esc="tax_amount"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                    <td class="text-right">
+                                        <span
+                                            t-esc="wt_amount"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                    <td class="text-right">
+                                        <span
+                                            t-esc="paid_amount"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </t>
+                                <t t-if="line.display_type == 'line_section'">
+                                    <td colspan="99">
+                                        <span
+                                            t-field="line.name"
+                                            t-options="{'widget': 'text'}"
+                                        />
+                                    </td>
+                                    <t t-set="current_section" t-value="line" />
+                                    <t t-set="current_total" t-value="0" />
+                                </t>
+                                <t t-if="line.display_type == 'line_note'">
+                                    <td colspan="99">
+                                        <span
+                                            t-field="line.name"
+                                            t-options="{'widget': 'text'}"
+                                        />
+                                    </td>
+                                </t>
+                            </tr>
+                            <t
+                                t-if="current_section and (line_last or lines[line_index+1].display_type == 'line_section')"
+                            >
+                                <tr class="is-subtotal text-right">
+                                    <td colspan="99">
+                                        <strong class="mr16">Subtotal</strong>
+                                        <span
+                                            t-esc="current_total"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                            </t>
+                        </t>
+                    </tbody>
+                </table>
+                <div class="clearfix">
+                    <div class="row">
+                        <div class="col-6 ml-auto">
+                            <table
+                                class="table table-sm"
+                                style="page-break-inside: avoid;"
+                            >
+                                <tr class="border-black o_total">
+                                    <td><strong>Total</strong></td>
+                                    <td class="text-right">
+                                        <span
+                                            class="text-nowrap"
+                                            t-esc="price_total"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>VAT 7%</strong></td>
+                                    <td class="text-right">
+                                        <span
+                                            class="text-nowrap"
+                                            t-esc="tax_amount_total"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>WHT</strong></td>
+                                    <td class="text-right">
+                                        <span
+                                            class="text-nowrap"
+                                            t-esc="wt_amount_total"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr class="border-black o_total">
+                                    <td><strong>Payment Amount</strong></td>
+                                    <td class="text-right">
+                                        <span
+                                            class="text-nowrap"
+                                            t-esc="paid_amount_total"
+                                            t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
+                                        />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer" style="font-size: 16px;">
+            <div class="text-center row">
+                <div class="col-3">
+                    <div style="border-top: 1px solid black;">
+                        <br />
+                        ชื่อผู้จัดทำ (Creator)<br /><br />
+                        ________/________/________
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div style="border-top: 1px solid black;">
+                        <br />
+                        ชื่อผู้ตรวจสอบ (Audit By)<br /><br />
+                        ________/________/________
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div style="border-top: 1px solid black;">
+                        <br />
+                        ชื่อผู้อนุมัติ / Approved By<br /><br />
+                        ________/________/________
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div style="border-top: 1px solid black;">
+                        <br />
+                        ชื่อผู้รับ (Receiver Name)<br /><br />
+                        ________/________/________
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <template id="report_vendor_bill">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t
+                    t-call="faf_forms.report_vendor_bill_document"
+                    t-lang="doc.partner_id.lang"
+                />
+            </t>
+        </t>
+    </template>
+</odoo>
