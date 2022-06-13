@@ -43,10 +43,10 @@
                     <div class="col-4" style="padding-top: 8px;">
                         <span t-field="doc.date" />
                     </div>
-                    <div class="col-3" style="font-size: 25px;">
+                    <div class="col-3" style="font-size: 22px;">
                         <strong>Payment Receipt :</strong>
                     </div>
-                    <div class="col-3" style="font-size: 25px;">
+                    <div class="col-3" style="font-size: 22px;">
                         <strong t-field="doc.name" />
                     </div>
                 </div>
