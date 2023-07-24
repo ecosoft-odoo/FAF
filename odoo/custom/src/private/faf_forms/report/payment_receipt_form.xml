@@ -122,7 +122,7 @@
                         <t t-set="total" t-value="0" />
                         <t t-set="amount_wt" t-value="0" />
                         <tr t-foreach="moves.sorted('invoice_date')" t-as="m">
-                            <t t-set="sign" t-value="m.move_type == 'out_refund' and -1 or 1"/>
+                            <t t-set="sign" t-value="m.move_type in ['out_refund', 'in_refund'] and -1 or 1"/>
                             <t t-set="amount" t-value="sign * m.amount_total" />
                             <t t-if="m.move_type != 'entry'">
                                 <td><span t-field="m.invoice_date" /></td>
