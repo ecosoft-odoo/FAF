@@ -200,7 +200,7 @@
                                 <t t-foreach="moves.sorted('invoice_date')" t-as="m">
                                     <t
                                         t-set="sign"
-                                        t-value="m.move_type == 'out_refund' and -1 or 1"
+                                        t-value="m.move_type in ['out_refund', 'in_refund'] and -1 or 1"
                                     />
                                     <t
                                         t-set="amount_tax"
