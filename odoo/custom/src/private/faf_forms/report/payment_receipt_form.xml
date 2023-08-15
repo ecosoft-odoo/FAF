@@ -36,28 +36,6 @@
             <div
                 style="page-break-inside: avoid;margin-top: 40px;font-size: 18px;line-height: 35px;"
             >
-                <!-- Get all account.move -->
-                <t
-                    t-set="full_reconcile"
-                    t-value="doc.move_id.line_ids.mapped('full_reconcile_id')"
-                />
-                <t t-if="full_reconcile and len(full_reconcile) == 1">
-                    <!-- If matching exist -->
-                    <t
-                        t-set="moves"
-                        t-value="full_reconcile.reconciled_line_ids.filtered(lambda l: l.move_id != doc.move_id).mapped('move_id')"
-                    />
-                </t>
-                <t t-else="">
-                    <!-- If matching not exist -->
-                    <t t-set="moves" t-value="doc.env['account.move']" />
-                    <t
-                        t-foreach="doc.move_id._get_reconciled_invoices_partials()"
-                        t-as="rec"
-                    >
-                        <t t-set="moves" t-value="moves | rec[2].move_id" />
-                    </t>
-                </t>
                 <div class="row">
                     <div class="col-2" style="padding-top: 8px;">
                         Payment Date :
@@ -121,13 +99,16 @@
                     <tbody>
                         <t t-set="total" t-value="0" />
                         <t t-set="amount_wt" t-value="0" />
-                        <tr t-foreach="moves.sorted('invoice_date')" t-as="m">
-                            <t t-set="sign" t-value="m.move_type in ['out_refund', 'in_refund'] and -1 or 1"/>
-                            <t t-set="amount" t-value="sign * m.amount_total" />
-                            <t t-if="m.move_type != 'entry'">
-                                <td><span t-field="m.invoice_date" /></td>
-                                <td><span t-field="m.name" /></td>
-                                <td><span t-field="m.ref" /></td>
+                        <tr
+                            t-foreach="doc.move_id._get_reconciled_invoices_partials()"
+                            t-as="rec"
+                        >
+                            <t t-set="amount" t-value="rec[1]" />
+                            <t t-set="inv" t-value="rec[2].move_id" />
+                            <t t-if="inv.move_type != 'entry'">
+                                <td><span t-field="inv.invoice_date" /></td>
+                                <td><span t-field="inv.name" /></td>
+                                <td><span t-field="inv.ref" /></td>
                                 <td class="text-right"><span
                                         t-esc="amount"
                                         t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
@@ -135,7 +116,7 @@
                                 <t t-set="total" t-value="total + amount" />
                                 <t
                                     t-set="amount_wt"
-                                    t-value="amount_wt + sign * sum(m.line_ids.filtered('wt_tax_id').mapped(lambda l: abs(l.wt_tax_id.amount / 100 * l.amount_currency)))"
+                                    t-value="amount_wt + sum(inv.line_ids.filtered('wt_tax_id').mapped(lambda l: l.wt_tax_id.amount / 100 * l.amount_currency))"
                                 />
                             </t>
                         </tr>
@@ -163,7 +144,7 @@
                                     <td class="text-right">
                                         <span
                                             class="text-nowrap"
-                                            t-esc="-1 * amount_wt"
+                                            t-esc="-1 * abs(amount_wt)"
                                             t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}"
                                         />
                                     </td>
